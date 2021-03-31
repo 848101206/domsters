@@ -366,3 +366,86 @@ function prepareForms() {
     }
   }
 }
+
+//Ajax
+
+function getHTTPbject(){
+  if (typeof XMLHttpRequest == "undefinded")
+  XMLHttpRequest = function (){
+    try {return new ActiveXObject("Msxl2.XMLHTTP.6.0");}
+    catch(e){}
+    try {return new ActiveXObject("Msxl2.XMLHTTP.3.0");}
+    catch(e){
+      try {return new ActiveXObject("Msml2.XMLHTTP");}
+    catch(e){}
+    }
+    return new XMLHttpRequest();
+  }
+}
+
+function  displayAjaxLoading(element) {
+  while(element.hasChilNodes()){
+    element.removeChild(element.lastChild);
+  }
+    var content = document.createElement("img");
+    content.setAttribute("src","image/loading.gif");
+    content.setAttribute("alt","Loading...");
+    element.appendChild(content);
+}
+
+function  submitFormWithAjax( Whichform, thetarget) {
+  var request = getHTTPbject();
+  if (!request){return false;}
+  displayAjaxLoading(thetarget);
+  var dataParts = []
+  var element;
+  for(var i=0; i<whichform.elements.length;i++){
+    element = whichform.elements[i];
+    dataParts[i] = element.name + '=' + encodeURIComponent(element,value);
+  }
+  var data = dataParts.join('&');
+
+  request.open('POST',whichform.getAttribute("action"),true);
+  request.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+
+  request.onreadystatechange = function () {
+    if(request.readyState == 4){
+      if(request.status == 200 || request.status == 0){
+        var matches = request.responseText.match(/<article>([\s\S]+)<\/article>/);
+        if(matches.length> 0){
+          thetarget.innerHTML = matches[1];
+        }else{
+          thetarget.innerHTML = '<p>Oops,there wass an error. Sorry.</p>';
+        }
+      }else{
+        thetarget.innerHTML = '<p>'+ request.statusText +'</p>';
+      }
+    }
+  };
+  request.send(data);
+  return true;
+};
+
+
+
+
+function  loadEvernts() {
+  //home
+  prepareSlideshow();
+  //about
+  prepareInternalnav();
+  //photos
+  preparePlaceholder();
+  prepareGallery();
+  //live
+  stripeTables();
+  highlightRows();
+  displayAbbreviations();
+  //contact
+  focusLabels();
+  prepareForms();  
+}
+
+//Load events
+addLoadEvent(highlightPage);
+addLoadEvent(loadEvernts);
